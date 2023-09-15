@@ -572,6 +572,19 @@ register_conv_template(
     )
 )
 
+# oo-phi-1_5 template
+register_conv_template(
+    Conversation(
+        name="oo-phi-1_5",
+        system_template="""<|im_start|>system\n{system_message}""",
+        system_message="""You are OrcaPhi.""",
+        roles=("<|im_start|>user", "<|im_start|>assistant"),
+        sep_style=SeparatorStyle.CHATML,
+        sep="<|im_end|>",
+        #stop_token_ids=[50295, 0],
+    )
+)
+
 # MPT default template
 register_conv_template(
     Conversation(

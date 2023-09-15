@@ -781,6 +781,44 @@ class StableLMAdapter(BaseModelAdapter):
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("stablelm")
 
+class PhiAdapter(BaseModelAdapter):
+    """The model adapter for Phi series"""
+
+    def match(self, model_path: str):
+        model_path = model_path.lower()
+        return "phi" in model_path and not "somethingelse" in model_path
+
+    def load_model(self, model_path: str, from_pretrained_kwargs: dict):
+        #revision = from_pretrained_kwargs.get("revision", "main")
+        model = AutoModelForCausalLM.from_pretrained(
+            model_path,
+            #low_cpu_mem_usage=True,
+            trust_remote_code=True,
+            #torch_dtype=torch.bfloat16,
+            **from_pretrained_kwargs,
+        )
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_path, trust_remote_code=True,
+            torch_dtype=torch.bfloat16,
+            return_tensors="pt", return_attention_mask=False
+        )
+        model.config.eos_token_id = tokenizer.eos_token_id
+        model.config.pad_token_id = tokenizer.pad_token_id
+        return model, tokenizer
+
+    def get_default_conv_template(self, model_path: str) -> Conversation:
+        model_path = model_path.lower()
+        if "oo-phi-1_5" in model_path:
+            print("Loading oo-phi-1_5")
+            return get_conv_template("oo-phi-1_5")
+        elif "somethingelsenotyet" in model_path:
+            return get_conv_template("oo-phi-1_5")
+        else:
+            print(
+                "Warning: Loading base Phi model with `zero_shot` conversation configuration.  "
+                "If this is not desired, inspect model configurations and names."
+            )
+            return get_conv_template("zero_shot")
 
 class MPTAdapter(BaseModelAdapter):
     """The model adapter for MPT series (mosaicml/mpt-7b-chat, mosaicml/mpt-30b-chat)"""
@@ -1651,6 +1689,7 @@ register_model_adapter(VigogneChatAdapter)
 register_model_adapter(OpenLLaMaOpenInstructAdapter)
 register_model_adapter(ReaLMAdapter)
 register_model_adapter(CodeLlamaAdapter)
+register_model_adapter(PhiAdapter)
 
 # After all adapters, try the default base adapter.
 register_model_adapter(BaseModelAdapter)
