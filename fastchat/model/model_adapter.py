@@ -173,7 +173,7 @@ def load_model(
             try:
                 import intel_extension_for_pytorch as ipex
 
-                kwargs = {"torch_dtype": torch.bfloat16}
+                kwargs = {"torch_dtype": torch.float16}
             except ImportError:
                 warnings.warn(
                     "Intel Extension for PyTorch is not installed, it can be installed to accelerate cpu inference"
@@ -1254,7 +1254,7 @@ class NousHermesAdapter(BaseModelAdapter):
     use_fast_tokenizer = False
 
     def match(self, model_path: str):
-        return "nous" in model_path.lower()
+        return "nous-hermes" in model_path.lower()
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("alpaca")
