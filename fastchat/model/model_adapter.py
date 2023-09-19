@@ -173,13 +173,13 @@ def load_model(
             try:
                 import intel_extension_for_pytorch as ipex
 
-                kwargs = {"torch_dtype": torch.float16}
+                kwargs = {"torch_dtype": torch.bfloat16}
             except ImportError:
                 warnings.warn(
                     "Intel Extension for PyTorch is not installed, it can be installed to accelerate cpu inference"
                 )
     elif device == "cuda":
-        kwargs = {"torch_dtype": torch.bfloat16}
+        kwargs = {"torch_dtype": torch.float16}
         if num_gpus != 1:
             kwargs["device_map"] = "auto"
             if max_gpu_memory is None:
