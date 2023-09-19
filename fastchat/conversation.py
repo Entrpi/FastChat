@@ -577,11 +577,22 @@ register_conv_template(
     Conversation(
         name="oo-phi-1_5",
         system_template="""<|im_start|>system\n{system_message}""",
-        system_message="""You are OrcaPhi.""",
+        system_message="""A chat.""",
         roles=("<|im_start|>user", "<|im_start|>assistant"),
         sep_style=SeparatorStyle.CHATML,
         sep="<|im_end|>",
         #stop_token_ids=[50295, 0],
+    )
+)
+
+# Phi-Hermes template
+register_conv_template(
+    Conversation(
+        name="phi-hermes",
+        system_message="The assistant gives helpful, detailed, and polite answers to the user's questions.",
+        roles=("### Instruction:", "### Response:"),
+        sep_style=SeparatorStyle.ADD_NEW_LINE_SINGLE,
+        sep="\n",
     )
 )
 

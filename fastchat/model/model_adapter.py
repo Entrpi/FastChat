@@ -162,6 +162,7 @@ def load_model(
     """Load a model from Hugging Face."""
     # get model adapter
     adapter = get_model_adapter(model_path)
+    print("adapter: " + str(adapter))
 
     # Handle device mapping
     cpu_offloading = raise_warning_for_incompatible_cpu_offloading_configuration(
@@ -179,7 +180,7 @@ def load_model(
                     "Intel Extension for PyTorch is not installed, it can be installed to accelerate cpu inference"
                 )
     elif device == "cuda":
-        kwargs = {"torch_dtype": torch.float16}
+        kwargs = {"torch_dtype": torch.bfloat16}
         if num_gpus != 1:
             kwargs["device_map"] = "auto"
             if max_gpu_memory is None:
@@ -789,18 +790,17 @@ class PhiAdapter(BaseModelAdapter):
         return "phi" in model_path and not "somethingelse" in model_path
 
     def load_model(self, model_path: str, from_pretrained_kwargs: dict):
-        #revision = from_pretrained_kwargs.get("revision", "main")
+        revision = from_pretrained_kwargs.get("revision", "main")
         model = AutoModelForCausalLM.from_pretrained(
             model_path,
-            #low_cpu_mem_usage=True,
             trust_remote_code=True,
             #torch_dtype=torch.bfloat16,
             **from_pretrained_kwargs,
         )
         tokenizer = AutoTokenizer.from_pretrained(
-            model_path, trust_remote_code=True,
+            model_path,
+            trust_remote_code=True,
             torch_dtype=torch.bfloat16,
-            return_tensors="pt", return_attention_mask=False
         )
         model.config.eos_token_id = tokenizer.eos_token_id
         model.config.pad_token_id = tokenizer.pad_token_id
@@ -808,11 +808,13 @@ class PhiAdapter(BaseModelAdapter):
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         model_path = model_path.lower()
+        print("Loading phi model conv_template")
         if "oo-phi-1_5" in model_path:
             print("Loading oo-phi-1_5")
             return get_conv_template("oo-phi-1_5")
-        elif "somethingelsenotyet" in model_path:
-            return get_conv_template("oo-phi-1_5")
+        elif "phi-hermes" in model_path:
+            print("Loading phi-hermes")
+            return get_conv_template("phi-hermes")
         else:
             print(
                 "Warning: Loading base Phi model with `zero_shot` conversation configuration.  "
@@ -1246,7 +1248,7 @@ class NousHermesAdapter(BaseModelAdapter):
     use_fast_tokenizer = False
 
     def match(self, model_path: str):
-        return "nous-hermes" in model_path.lower()
+        return "nous" in model_path.lower()
 
     def get_default_conv_template(self, model_path: str) -> Conversation:
         return get_conv_template("alpaca")
