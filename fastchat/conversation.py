@@ -612,7 +612,6 @@ register_conv_template(
 register_conv_template(
     Conversation(
         name="phi-hermes",
-        system_message="The assistant gives helpful, detailed, and polite answers to the user's questions.",
         roles=("### Instruction:", "### Response:"),
         sep_style=SeparatorStyle.ADD_NEW_LINE_SINGLE,
         sep="\n",
